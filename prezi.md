@@ -1,0 +1,79 @@
+JHU Developing Data Products Week 4 - Abdulaziz Banafunzi - 15/06/2019
+========================================================
+author: 
+date: 
+autosize: true
+
+Overview 
+========================================================
+
+This presentation is outlining an R Shiny web application that I have developed as part of week 4 of the John Hopkins Data Science specialization.
+
+Dashboard: https://azizb.shinyapps.io/usaarrests/
+
+Data 
+========================================================
+
+The dashboard uses the USArrests data which includes data about arrests in the USA.
+
+The dashboard presents data for USA arrests. The user is able to change the state via a drop down menu.
+
+Widgets used
+========================================================
+The application uses a selectinput widget. This provides a drop down menu which can be used to change the state and view different results.
+
+Once a new state has been selected the application will recalculate results and process a new graph.
+
+server.r
+========================================================
+
+
+```r
+library(shiny)
+library(ggplot2)
+# Define server logic required to draw a histogram
+shinyServer(function(input, output,session) {
+    
+
+  output$distplot <- renderPlot({
+data("USArrests")
+USArrests<- subset(USArrests,rownames(USArrests)==input$state)
+USArrests<-melt(USArrests)   
+ggplot(USArrests,aes(x=variable,y=value))+
+  geom_col()+
+  labs(title = "Number of Arrests in State",y="Arrests",x="Crime")
+  })
+  
+})
+```
+
+
+ui.r
+========================================================
+
+```r
+library(shiny)
+library(reshape2)
+
+# Define UI for application that draws a histogram
+shinyUI(fluidPage(
+  # Application title
+  titlePanel("USA Arrests - Use the dropdown to change State"),
+  
+  # Sidebar with a slider input for number of bins 
+  sidebarLayout(
+    sidebarPanel(
+       selectInput("state",
+                   "Select State:",
+                   choices = c(rownames(USArrests))
+    )
+    ),
+    
+    # Show a plt of the gene
+    mainPanel(
+      plotOutput("distplot")
+    )
+  )
+))
+```
+
